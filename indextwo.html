@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket with Vue</title>
+    <!-- Add Vue.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="messages">
+            <div v-for="(msg, index) in messages" :key="index">{{ msg }}</div>
+        </div>
+        <input type="text" v-model="message" id="messageInput" />
+        <button @click="sendMessage" id="sendButton">Send</button>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                messages: [],
+                message: '',
+                ws: null
+            },
+            mounted() {
+                this.ws = new WebSocket('ws://localhost:8080');
+                this.ws.onopen = () => {
+                    console.log('Connected to WebSocket server');
+                };
+                this.ws.onmessage = (event) => {
+                    console.log(event)
+                    console.log(event.data)
+                    this.messages.push(event.data);
+                };
+            },
+            methods: {
+                sendMessage() {
+                    if (this.ws && this.message) {
+                        this.ws.send(this.message);
+                        this.message = '';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
