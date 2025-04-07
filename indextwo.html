@@ -9,38 +9,43 @@
 </head>
 <body>
     <div id="app">
-        <div v-for="(checked, index) in checkboxes" :key="index">
-            <input type="checkbox" :checked="checked" @change="toggleCheckbox(index)">
-            Checkbox {{ index + 1 }}
+        <h1>General Knowledge Quiz</h1>
+        <p>What is the capital of France?</p>
+        <div v-for="(answer, index) in answers" :key="index">
+            <input type="radio" :value="answer" v-model="selectedAnswer" @change="selectAnswer">
+            {{ answer }}
         </div>
+        <p>Selected Answer: {{ selectedAnswer }}</p>
     </div>
 
     <script>
         new Vue({
             el: '#app',
             data: {
-                checkboxes: [false, false, false],
-                ws: null
+                answers: ['Paris', 'London', 'Berlin'],
+                selectedAnswer: '',
+                ws: null,
+                clientId: Math.random().toString(36).substring(2, 15)
             },
             mounted() {
                 this.ws = new WebSocket('ws://localhost:8080');
                 this.ws.onmessage = (event) => {
+                    const messageString = event.data.toString();
                     try {
-                        // Attempt to parse as JSON
-                        const data = JSON.parse(event.data);
-                        if (data.checkboxes) {
-                            this.checkboxes = data.checkboxes;
+                        const data = JSON.parse(messageString);
+                        if (data.clientId !== this.clientId) {
+                            this.selectedAnswer = data.selectedAnswer;
+                        } else {
+                            console.log('Message received from this client');
                         }
                     } catch (error) {
-                        // Handle non-JSON messages
-                        console.log('Received non-JSON message:', event.data);
+                        console.log('Received non-JSON message:', messageString);
                     }
                 };
             },
             methods: {
-                toggleCheckbox(index) {
-                    this.checkboxes[index] = !this.checkboxes[index];
-                    this.ws.send(JSON.stringify({ checkboxes: this.checkboxes }));
+                selectAnswer() {
+                    this.ws.send(JSON.stringify({ selectedAnswer: this.selectedAnswer }));
                 }
             }
         });
