@@ -6,26 +6,28 @@
     <title>Checkbox Sync with WebSocket</title>
     <!-- Add Vue.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <h1>General Knowledge Quiz</h1>
-        <p>What is the capital of France?</p>
-        <div v-for="(answer, index) in answers" :key="index">
-            <input type="radio" :value="answer" v-model="selectedAnswer" @change="selectAnswer">
-            {{ answer }}
+    <div id="app" class="app-content">
+        <h1 class="title">General Knowledge Quiz</h1>
+        <p class="description">What is the capital of France?</p>
+        <div class="flex-horizontal gap-12px">
+            <button class="google-oauth-button" v-for="(answer, index) in answers" :key="index" @click="selectAnswer(answer)">
+                {{ answer }}
+            </button>
         </div>
-        <p>Selected Answer: {{ selectedAnswer }}</p>
+        <p class="description">Selected Answer: {{ selectedAnswer }}</p>
     </div>
 
     <script>
         new Vue({
             el: '#app',
             data: {
-                answers: ['Paris', 'London', 'Berlin'],
+                answers: ['Komodo dragon', 'Saltwater crocodile', 'Black mamba', 'African elephant'],
                 selectedAnswer: '',
                 ws: null,
-                clientId: Math.random().toString(36).substring(2, 15) // Generate a unique ID for this client
+                clientId: Math.random().toString(36).substring(2, 15)
             },
             mounted() {
                 this.ws = new WebSocket('ws://localhost:8080');
@@ -33,14 +35,10 @@
                     const messageString = event.data.toString();
                     try {
                         const data = JSON.parse(messageString);
-                        if (data.selectedAnswer !== undefined) {
-                            if (data.clientId !== this.clientId) {
-                                // Message is from another client
-                                this.selectedAnswer = data.selectedAnswer;
-                            } else {
-                                // Message is from this client
-                                console.log('Message received from this client');
-                            }
+                        if (data.clientId !== this.clientId) {
+                            this.selectedAnswer = data.selectedAnswer;
+                        } else {
+                            console.log('Message received from this client');
                         }
                     } catch (error) {
                         console.log('Received non-JSON message:', messageString);
@@ -48,11 +46,9 @@
                 };
             },
             methods: {
-                selectAnswer() {
-                    this.ws.send(JSON.stringify({
-                        selectedAnswer: this.selectedAnswer,
-                        clientId: this.clientId // Include the client ID in the message
-                    }));
+                selectAnswer(answer) {
+                    this.selectedAnswer = answer;
+                    this.ws.send(JSON.stringify({ selectedAnswer: this.selectedAnswer, clientId: this.clientId }));
                 }
             }
         });

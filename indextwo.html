@@ -6,23 +6,25 @@
     <title>Checkbox Sync with WebSocket - Page 2</title>
     <!-- Add Vue.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <h1>General Knowledge Quiz</h1>
-        <p>What is the capital of France?</p>
-        <div v-for="(answer, index) in answers" :key="index">
-            <input type="radio" :value="answer" v-model="selectedAnswer" @change="selectAnswer">
-            {{ answer }}
+    <div id="app" class="app-content">
+        <h1 class="title">General Knowledge Quiz</h1>
+        <p class="description">What is the capital of France?</p>
+        <div class="flex-horizontal gap-12px">
+            <button class="google-oauth-button" v-for="(answer, index) in answers" :key="index" @click="selectAnswer(answer)">
+                {{ answer }}
+            </button>
         </div>
-        <p>Selected Answer: {{ selectedAnswer }}</p>
+        <p class="description">Selected Answer: {{ selectedAnswer }}</p>
     </div>
 
     <script>
         new Vue({
             el: '#app',
             data: {
-                answers: ['Paris', 'London', 'Berlin'],
+                answers: ['Komodo dragon', 'Saltwater crocodile', 'Black mamba', 'African elephant'],
                 selectedAnswer: '',
                 ws: null,
                 clientId: Math.random().toString(36).substring(2, 15)
@@ -44,8 +46,9 @@
                 };
             },
             methods: {
-                selectAnswer() {
-                    this.ws.send(JSON.stringify({ selectedAnswer: this.selectedAnswer }));
+                selectAnswer(answer) {
+                    this.selectedAnswer = answer;
+                    this.ws.send(JSON.stringify({ selectedAnswer: this.selectedAnswer, clientId: this.clientId }));
                 }
             }
         });
