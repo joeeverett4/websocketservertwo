@@ -7,20 +7,19 @@ wss.on('connection', (ws) => {
     console.log('New client connected');
 
     // Send a welcome message to the client
-    ws.send('Welcome to the WebSocket server!');
+    ws.send(JSON.stringify({ message: 'Welcome to the WebSocket server!' }));
 
     // Handle incoming messages from the client
     ws.on('message', (message) => {
-        // Convert the buffer to a string
-        const messageString = message.toString();
-        console.log(`Received: ${messageString}`);
-        console.log(`Type of message: ${typeof messageString}`);
-
         // Broadcast the message to all connected clients
+        console.log(message)
+        const jzmesage = message.toString()
+        console.log(jzmesage)
+        console.log(typeof message)
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
-                console.log(`Sending message: ${messageString}`);
-                client.send(messageString);
+                console.log(`Sending message: ${message}`);
+                client.send(jzmesage);
             }
         });
     });

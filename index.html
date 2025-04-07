@@ -3,42 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket with Vue</title>
+    <title>Checkbox Sync with WebSocket</title>
     <!-- Add Vue.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 </head>
 <body>
     <div id="app">
-        <div id="messages">
-            <div v-for="(msg, index) in messages" :key="index">{{ msg }}</div>
+        <div v-for="(checked, index) in checkboxes" :key="index">
+            <input type="checkbox" :checked="checked" @change="toggleCheckbox(index)">
+            Checkbox {{ index + 1 }}
         </div>
-        <input type="text" v-model="message" id="messageInput" />
-        <button @click="sendMessage" id="sendButton">Send</button>
     </div>
 
     <script>
         new Vue({
             el: '#app',
             data: {
-                messages: [],
-                message: '',
+                checkboxes: [false, false, false],
                 ws: null
             },
             mounted() {
                 this.ws = new WebSocket('ws://localhost:8080');
-                this.ws.onopen = () => {
-                    console.log('Connected to WebSocket server');
-                };
                 this.ws.onmessage = (event) => {
-                    this.messages.push(event.data);
+                    try {
+                        // Attempt to parse as JSON
+                        console.log(event.data)
+                        const data = JSON.parse(event.data);
+                        if (data.checkboxes) {
+                            this.checkboxes = data.checkboxes;
+                        }
+                    } catch (error) {
+                        // Handle non-JSON messages
+                        console.log('Received non-JSON message:', event.data);
+                    }
                 };
             },
             methods: {
-                sendMessage() {
-                    if (this.ws && this.message) {
-                        this.ws.send(this.message);
-                        this.message = '';
-                    }
+                toggleCheckbox(index) {
+                    console.log(index)
+                    console.log(this.checkboxes)
+                    this.checkboxes[index] = !this.checkboxes[index];
+                    this.ws.send(JSON.stringify({ checkboxes: this.checkboxes }));
                 }
             }
         });
