@@ -13,7 +13,7 @@ wss.on('connection', (ws) => {
     ws.on('message', (message) => {
         console.log(`Received: ${message}`);
         // Echo the message back to the client
-        ws.send(`Echo: ${message}`);
+        ws.send(`Echo: hi`);
     });
 
     // Handle client disconnection
