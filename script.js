@@ -14,6 +14,6 @@ ws.onmessage = (event) => {
 document.getElementById('sendButton').addEventListener('click', () => {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value;
-    ws.send("yoyo");
+    ws.send(message);
     messageInput.value = '';
 }); 
